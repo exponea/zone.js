@@ -6,9 +6,9 @@
 * found in the LICENSE file at https://angular.io/license
 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (factory());
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(factory());
 }(this, (function () { 'use strict';
 
 /**
@@ -1260,24 +1260,6 @@ function findExistingRegisteredTask(target, handler, name, capture, remove) {
                 return eventTask;
             }
         }
-    }
-    return null;
-}
-function findAllExistingRegisteredTasks(target, name, capture, remove) {
-    var eventTasks = target[EVENT_TASKS];
-    if (eventTasks) {
-        var result = [];
-        for (var i = eventTasks.length - 1; i >= 0; i--) {
-            var eventTask = eventTasks[i];
-            var data = eventTask.data;
-            if (data.eventName === name && data.useCapturing === capture) {
-                result.push(eventTask);
-                if (remove) {
-                    eventTasks.splice(i, 1);
-                }
-            }
-        }
-        return result;
     }
     return null;
 }

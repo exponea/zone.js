@@ -6,9 +6,9 @@
 * found in the LICENSE file at https://angular.io/license
 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (factory());
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(factory());
 }(this, (function () { 'use strict';
 
 /**
@@ -1131,14 +1131,7 @@ var Zone$1 = (function (global) {
  */
 var zoneSymbol = function (n) { return ("__zone_symbol__" + n); };
 var _global$1 = typeof window === 'object' && window || typeof self === 'object' && self || global;
-function bindArguments(args, source) {
-    for (var i = args.length - 1; i >= 0; i--) {
-        if (typeof args[i] === 'function') {
-            args[i] = Zone.current.wrap(args[i], source + '_' + i);
-        }
-    }
-    return args;
-}
+
 
 var isWebWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
 var isNode = (!('nw' in _global$1) && typeof process !== 'undefined' &&
@@ -1148,65 +1141,7 @@ var isNode = (!('nw' in _global$1) && typeof process !== 'undefined' &&
 var isMix = typeof process !== 'undefined' &&
     {}.toString.call(process) === '[object process]' && !isWebWorker &&
     !!(typeof window !== 'undefined' && window['HTMLElement']);
-function patchProperty(obj, prop) {
-    var desc = Object.getOwnPropertyDescriptor(obj, prop) || { enumerable: true, configurable: true };
-    var originalDesc = Object.getOwnPropertyDescriptor(obj, 'original' + prop);
-    if (!originalDesc && desc.get) {
-        Object.defineProperty(obj, 'original' + prop, { enumerable: false, configurable: true, get: desc.get });
-    }
-    // A property descriptor cannot have getter/setter and be writable
-    // deleting the writable and value properties avoids this error:
-    //
-    // TypeError: property descriptors must not specify a value or be writable when a
-    // getter or setter has been specified
-    delete desc.writable;
-    delete desc.value;
-    // substr(2) cuz 'onclick' -> 'click', etc
-    var eventName = prop.substr(2);
-    var _prop = '_' + prop;
-    desc.set = function (fn) {
-        if (this[_prop]) {
-            this.removeEventListener(eventName, this[_prop]);
-        }
-        if (typeof fn === 'function') {
-            var wrapFn = function (event) {
-                var result;
-                result = fn.apply(this, arguments);
-                if (result != undefined && !result)
-                    event.preventDefault();
-            };
-            this[_prop] = wrapFn;
-            this.addEventListener(eventName, wrapFn, false);
-        }
-        else {
-            this[_prop] = null;
-        }
-    };
-    // The getter would return undefined for unassigned properties but the default value of an
-    // unassigned property is null
-    desc.get = function () {
-        var r = this[_prop] || null;
-        // result will be null when use inline event attribute,
-        // such as <button onclick="func();">OK</button>
-        // because the onclick function is internal raw uncompiled handler
-        // the onclick will be evaluated when first time event was triggered or
-        // the property is accessed, https://github.com/angular/zone.js/issues/525
-        // so we should use original native get to retrieve the handler
-        if (r === null) {
-            if (originalDesc && originalDesc.get) {
-                r = originalDesc.get.apply(this, arguments);
-                if (r) {
-                    desc.set.apply(this, [r]);
-                    if (typeof this['removeAttribute'] === 'function') {
-                        this.removeAttribute(prop);
-                    }
-                }
-            }
-        }
-        return this[_prop] || null;
-    };
-    Object.defineProperty(obj, prop, desc);
-}
+
 
 
 
@@ -1407,7 +1342,6 @@ function makeZoneAwareListeners(fnName) {
 var zoneAwareAddEventListener = makeZoneAwareAddListener(ADD_EVENT_LISTENER, REMOVE_EVENT_LISTENER);
 var zoneAwareRemoveEventListener = makeZoneAwareRemoveListener(REMOVE_EVENT_LISTENER);
 
-var originalInstanceKey = zoneSymbol('originalInstance');
 // wrap some native API on `window`
 
 
@@ -1505,16 +1439,16 @@ var EE_REMOVE_LISTENER = 'removeListener';
 var EE_REMOVE_ALL_LISTENER = 'removeAllListeners';
 var EE_LISTENERS = 'listeners';
 var EE_ON = 'on';
-var zoneAwareAddListener$1 = callAndReturnFirstParam(makeZoneAwareAddListener(EE_ADD_LISTENER, EE_REMOVE_LISTENER, false, true, false));
+var zoneAwareAddListener = callAndReturnFirstParam(makeZoneAwareAddListener(EE_ADD_LISTENER, EE_REMOVE_LISTENER, false, true, false));
 var zoneAwarePrependListener = callAndReturnFirstParam(makeZoneAwareAddListener(EE_PREPEND_LISTENER, EE_REMOVE_LISTENER, false, true, true));
-var zoneAwareRemoveListener$1 = callAndReturnFirstParam(makeZoneAwareRemoveListener(EE_REMOVE_LISTENER, false));
+var zoneAwareRemoveListener = callAndReturnFirstParam(makeZoneAwareRemoveListener(EE_REMOVE_LISTENER, false));
 var zoneAwareRemoveAllListeners = callAndReturnFirstParam(makeZoneAwareRemoveAllListeners(EE_REMOVE_ALL_LISTENER, false));
 var zoneAwareListeners = makeZoneAwareListeners(EE_LISTENERS);
 function patchEventEmitterMethods(obj) {
     if (obj && obj.addListener) {
-        patchMethod(obj, EE_ADD_LISTENER, function () { return zoneAwareAddListener$1; });
+        patchMethod(obj, EE_ADD_LISTENER, function () { return zoneAwareAddListener; });
         patchMethod(obj, EE_PREPEND_LISTENER, function () { return zoneAwarePrependListener; });
-        patchMethod(obj, EE_REMOVE_LISTENER, function () { return zoneAwareRemoveListener$1; });
+        patchMethod(obj, EE_REMOVE_LISTENER, function () { return zoneAwareRemoveListener; });
         patchMethod(obj, EE_REMOVE_ALL_LISTENER, function () { return zoneAwareRemoveAllListeners; });
         patchMethod(obj, EE_LISTENERS, function () { return zoneAwareListeners; });
         obj[EE_ON] = obj[EE_ADD_LISTENER];
